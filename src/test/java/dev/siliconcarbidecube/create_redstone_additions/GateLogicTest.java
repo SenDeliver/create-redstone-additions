@@ -346,6 +346,32 @@ class GateLogicTest {
     }
 
     @Test
+    void crossroadPowersAnotherCrossroadThroughABlock() {
+        try (TestArea area = TestArea.create()) {
+            BlockPos other = POS.north(2);
+            BlockPos lamp = POS.north(3);
+            BlockState crossroad = ModBlocks.CROSSROAD.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH);
+            area.set(POS, crossroad);
+            area.set(POS.north(), Blocks.STONE.defaultBlockState());
+            area.set(other, crossroad);
+            area.set(lamp, Blocks.REDSTONE_LAMP.defaultBlockState());
+            area.lever(POS.south(), false);
+
+            area.setLever(POS.south(), true);
+            area.tick(1);
+            assertEquals(15, area.get(POS).getValue(Crossroad.POWER));
+            assertEquals(14, area.get(other).getValue(Crossroad.POWER), "a block costs one, like a wire");
+            assertTrue(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.setLever(POS.south(), false);
+            area.tick(5);
+            assertEquals(0, area.get(POS).getValue(Crossroad.POWER));
+            assertEquals(0, area.get(other).getValue(Crossroad.POWER));
+            assertFalse(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+        }
+    }
+
+    @Test
     void crossroadGlowsForEitherAxis() {
         BlockState crossroad = ModBlocks.CROSSROAD.get().defaultBlockState();
         assertEquals(0, crossroad.getLightEmission());

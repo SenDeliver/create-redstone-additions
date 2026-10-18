@@ -21,7 +21,7 @@ public class Crossroad extends AbstractCustomDiodeBlock {
     public static final IntegerProperty POWER = BlockStateProperties.POWER;
     public static final IntegerProperty FLANK_POWER = IntegerProperty.create("flank_power", 0, 15);
     public static final IntegerProperty MODEL_TYPE = IntegerProperty.create("model_type", 0, 3);
-    private boolean shouldSignal = true;
+    private @Nullable BlockPos readingPos;
 
     public Crossroad(Properties properties) {
         super(Crossroad::new);
@@ -65,7 +65,7 @@ public class Crossroad extends AbstractCustomDiodeBlock {
 
     @Override
     protected int getDirectSignal(BlockState blockState, BlockGetter getter, BlockPos pos, Direction dir) {
-        return this.shouldSignal ? super.getDirectSignal(blockState, getter, pos, dir) : 0;
+        return pos.equals(this.readingPos) ? 0 : Math.max(super.getDirectSignal(blockState, getter, pos, dir) - 1, 0);
     }
 
     protected int getOutputSignal(BlockGetter getter, BlockPos pos, BlockState blockState) {
@@ -113,11 +113,11 @@ public class Crossroad extends AbstractCustomDiodeBlock {
     }
 
     private int getInputSignalIgnoringOwnOutput(Level level, BlockPos pos, BlockState state, boolean flank) {
-        this.shouldSignal = false;
+        this.readingPos = pos;
         try {
             return flank ? this.getFlankInputSignal(level, pos, state) : this.getInputSignal(level, pos, state);
         } finally {
-            this.shouldSignal = true;
+            this.readingPos = null;
         }
     }
 
