@@ -299,6 +299,24 @@ class GateLogicTest {
     }
 
     @Test
+    void crossroadPlacedBesideWireLinesPicksThemUp() {
+        try (TestArea area = TestArea.create()) {
+            area.redstoneBlock(POS.north().west(2));
+            area.wire(POS.north().west());
+            area.wire(POS.north());
+            area.redstoneBlock(POS.east().south(2));
+            area.wire(POS.east().south());
+            area.wire(POS.east());
+            placeGate(area, ModBlocks.CROSSROAD.get(), POS);
+            area.tick(1);
+            BlockState state = area.get(POS);
+            assertEquals(14, state.getValue(Crossroad.POWER));
+            assertEquals(14, state.getValue(Crossroad.FLANK_POWER));
+            assertEquals(3, state.getValue(Crossroad.MODEL_TYPE));
+        }
+    }
+
+    @Test
     void crossroadDoesNotLatchThroughBlockItPowers() {
         try (TestArea area = TestArea.create()) {
             area.set(POS, ModBlocks.CROSSROAD.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH));

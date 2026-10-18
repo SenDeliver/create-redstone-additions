@@ -77,7 +77,7 @@ public class Crossroad extends AbstractCustomDiodeBlock {
     }
 
     protected boolean shouldTurnOn(Level level, BlockPos pos, BlockState state) {
-        return state.getValue(POWER) > 0;
+        return this.getInputSignal(level, pos, state) > 0 || this.getFlankInputSignal(level, pos, state) > 0;
     }
 
     protected int getInputSignal(Level level, BlockPos pos, BlockState state) {
