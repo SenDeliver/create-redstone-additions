@@ -182,6 +182,10 @@ public class Crossroad extends AbstractCustomDiodeBlock {
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos,
                                 Block block, BlockPos fromPos, boolean isMoving) {
+        if (!state.canSurvive(level, pos)) {
+            super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+            return;
+        }
         if (!level.isClientSide && !this.isLocked(level, pos, state)) {
             int newPower = this.getInputSignal(level, pos, state);
             int oldPower = state.getValue(POWER);

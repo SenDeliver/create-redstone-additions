@@ -45,6 +45,22 @@ class DropsTest {
     }
 
     @Test
+    void popsOffWhenSupportIsRemoved() {
+        try (TestArea area = TestArea.create()) {
+            BlockPos support = new BlockPos(3, 1, 3);
+            BlockPos pos = support.above();
+            for (Supplier<? extends Block> block : BLOCKS) {
+                area.set(support, Blocks.STONE.defaultBlockState());
+                area.set(pos, block.get().defaultBlockState());
+                area.clear(support);
+                assertTrue(area.get(pos).isAir(), block.get() + " removed");
+                assertEquals(1, area.countItems(block.get().asItem(), pos, 1.5), block.get() + " dropped");
+                area.clearItems();
+            }
+        }
+    }
+
+    @Test
     void creativeBreakDropsNothing() {
         try (TestArea area = TestArea.create()) {
             FakePlayer player = area.player(ItemStack.EMPTY);
