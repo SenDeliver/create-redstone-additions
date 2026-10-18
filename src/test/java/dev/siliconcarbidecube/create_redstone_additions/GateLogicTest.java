@@ -10,7 +10,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import org.junit.jupiter.api.Test;
@@ -245,6 +247,35 @@ class GateLogicTest {
             assertEquals(0, state.getValue(Crossroad.FLANK_POWER));
             assertEquals(0, state.getValue(Crossroad.MODEL_TYPE));
             assertEquals(0, area.wirePower(POS.west()));
+        }
+    }
+
+    @Test
+    void crossroadDoesNotLatchThroughBlockItPowers() {
+        try (TestArea area = TestArea.create()) {
+            area.set(POS, ModBlocks.CROSSROAD.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH));
+            area.set(POS.north(), Blocks.STONE.defaultBlockState());
+            area.set(POS.north(2), Blocks.REDSTONE_LAMP.defaultBlockState());
+            area.set(POS.west(), Blocks.STONE.defaultBlockState());
+            area.set(POS.west(2), Blocks.REDSTONE_LAMP.defaultBlockState());
+
+            area.redstoneBlock(POS.south());
+            area.redstoneBlock(POS.east());
+            assertEquals(15, area.get(POS).getValue(Crossroad.POWER));
+            assertEquals(15, area.get(POS).getValue(Crossroad.FLANK_POWER));
+            assertTrue(area.get(POS.north(2)).getValue(RedstoneLampBlock.LIT), "axis output strongly powers the block");
+            assertTrue(area.get(POS.west(2)).getValue(RedstoneLampBlock.LIT), "flank output strongly powers the block");
+
+            area.clear(POS.south());
+            area.clear(POS.east());
+            area.tick(5);
+            assertEquals(0, area.get(POS).getValue(Crossroad.POWER));
+            assertEquals(0, area.get(POS).getValue(Crossroad.FLANK_POWER));
+            assertEquals(0, area.power(POS.north(2)));
+            assertEquals(0, area.power(POS.west(2)));
+
+            area.lever(POS.north().above(), true);
+            assertEquals(15, area.get(POS).getValue(Crossroad.POWER), "still reads blocks powered by other sources");
         }
     }
 
