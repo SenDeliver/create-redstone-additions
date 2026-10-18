@@ -111,6 +111,29 @@ class GateLogicTest {
     }
 
     @Test
+    void conjunctorDrivesWireAndLampInFront() {
+        try (TestArea area = TestArea.create()) {
+            BlockPos lamp = POS.north(2);
+            area.set(lamp, Blocks.REDSTONE_LAMP.defaultBlockState());
+            placeGate(area, ModBlocks.CONJUNCTOR.get(), POS);
+            area.wire(POS.north());
+
+            area.redstoneBlock(POS.east());
+            assertEquals(0, area.wirePower(POS.north()));
+            assertFalse(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.redstoneBlock(POS.west());
+            assertEquals(15, area.wirePower(POS.north()));
+            assertTrue(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.clear(POS.east());
+            area.tick(5);
+            assertEquals(0, area.wirePower(POS.north()));
+            assertFalse(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+        }
+    }
+
+    @Test
     void conjunctorPlacedBetweenPoweredSidesUsesTheItem() {
         try (TestArea area = TestArea.create()) {
             area.redstoneBlock(POS.east());
@@ -189,6 +212,34 @@ class GateLogicTest {
             area.redstoneBlock(POS.south());
             area.tick(2);
             assertOutputOnlyNorth(area, POS, 0);
+        }
+    }
+
+    @Test
+    void disjunctorDrivesWireAndLampInFront() {
+        try (TestArea area = TestArea.create()) {
+            BlockPos lamp = POS.north(2);
+            area.set(lamp, Blocks.REDSTONE_LAMP.defaultBlockState());
+            placeGate(area, ModBlocks.DISJUNCTOR.get(), POS);
+            area.wire(POS.north());
+            assertEquals(0, area.wirePower(POS.north()));
+            assertFalse(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.redstoneBlock(POS.east());
+            area.tick(2);
+            assertEquals(15, area.wirePower(POS.north()));
+            assertTrue(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.redstoneBlock(POS.west());
+            area.clear(POS.east());
+            area.tick(2);
+            assertEquals(15, area.wirePower(POS.north()));
+            assertTrue(area.get(lamp).getValue(RedstoneLampBlock.LIT));
+
+            area.clear(POS.west());
+            area.tick(5);
+            assertEquals(0, area.wirePower(POS.north()));
+            assertFalse(area.get(lamp).getValue(RedstoneLampBlock.LIT));
         }
     }
 
