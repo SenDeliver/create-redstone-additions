@@ -130,6 +130,24 @@ class GateLogicTest {
     }
 
     @Test
+    void conjunctorPlacedBesideWireLinesPicksThemUp() {
+        try (TestArea area = TestArea.create()) {
+            for (BlockPos side : List.of(POS.east(), POS.west(), POS.east(4))) {
+                area.redstoneBlock(side.north(2));
+                area.wire(side.north());
+                area.wire(side);
+                area.wire(side.south());
+            }
+            placeGate(area, ModBlocks.CONJUNCTOR.get(), POS);
+            placeGate(area, ModBlocks.CONJUNCTOR.get(), POS.east(3));
+            area.tick(1);
+            assertEquals(3, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 15);
+            assertEquals(1, area.get(POS.east(3)).getValue(Conjunctor.POWER_TYPE));
+        }
+    }
+
+    @Test
     void conjunctorDoesNotKeepRescheduling() {
         try (TestArea area = TestArea.create()) {
             area.set(POS, ModBlocks.CONJUNCTOR.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH));

@@ -53,7 +53,7 @@ public class Conjunctor extends AbstractCustomDiodeBlock {
     }
 
     protected boolean shouldTurnOn(Level p_52502_, BlockPos p_52503_, BlockState p_52504_) {
-        return this.getInputSignal(p_52502_, p_52503_, p_52504_) == 3;
+        return this.getInputSignal(p_52502_, p_52503_, p_52504_) > 0;
     }
 
     protected int getInputSignal(Level p_52544_, BlockPos p_52545_, BlockState p_52546_) {
