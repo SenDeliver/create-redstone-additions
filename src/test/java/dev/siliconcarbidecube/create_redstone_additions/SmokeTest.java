@@ -1,6 +1,9 @@
 package dev.siliconcarbidecube.create_redstone_additions;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.simibubi.create.AllTags;
+import dev.siliconcarbidecube.create_redstone_additions.ponder.PonderTags;
 import dev.siliconcarbidecube.create_redstone_additions.test.TestArea;
 import dev.siliconcarbidecube.create_redstone_additions.test.TestServer;
 import net.minecraft.core.BlockPos;
@@ -15,6 +18,9 @@ import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +46,20 @@ class SmokeTest {
         assertTrue(TestServer.call(() -> TestServer.get().getRecipeManager()
                 .byKey(ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, "crafting/diode")).isPresent()), "mod datapack loaded");
         assertTrue(Blocks.REPEATER.defaultBlockState().is(AllTags.AllBlockTags.WRENCH_PICKUP.tag), "Create tags bound");
+    }
+
+    @Test
+    void ponderTagHasLangInEveryLanguage() throws Exception {
+        ResourceLocation tag = PonderTags.CREATE_REDSTONE_ADDITIONS_PONDER;
+        String key = tag.getNamespace() + ".ponder.tag." + tag.getPath();
+        for (String lang : List.of("en_us", "ru_ru")) {
+            try (InputStream in = SmokeTest.class.getResourceAsStream("/assets/" + CreateRedstoneAdditions.MOD_ID + "/lang/" + lang + ".json")) {
+                assertNotNull(in, lang);
+                JsonObject json = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+                assertTrue(json.has(key), lang + " " + key);
+                assertTrue(json.has(key + ".description"), lang + " " + key + ".description");
+            }
+        }
     }
 
     @Test
