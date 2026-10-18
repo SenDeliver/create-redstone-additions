@@ -1,6 +1,7 @@
 package dev.siliconcarbidecube.create_redstone_additions;
 
 import dev.siliconcarbidecube.create_redstone_additions.blocks.AbstractResistor;
+import dev.siliconcarbidecube.create_redstone_additions.blocks.Conjunctor;
 import dev.siliconcarbidecube.create_redstone_additions.blocks.Crossroad;
 import dev.siliconcarbidecube.create_redstone_additions.blocks.Diode;
 import dev.siliconcarbidecube.create_redstone_additions.init.ModBlocks;
@@ -74,6 +75,67 @@ class GateLogicTest {
             area.clear(POS.south(2));
             assertEquals(0, area.get(POS).getValue(Diode.POWER));
             assertEquals(0, area.wirePower(POS.north()));
+        }
+    }
+
+    @Test
+    void conjunctorIsAnd() {
+        try (TestArea area = TestArea.create()) {
+            BlockPos right = POS.east();
+            BlockPos left = POS.west();
+            placeGate(area, ModBlocks.CONJUNCTOR.get(), POS);
+            assertEquals(0, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 0);
+
+            area.redstoneBlock(right);
+            assertEquals(1, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 0);
+
+            area.redstoneBlock(left);
+            assertEquals(3, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 15);
+
+            area.clear(right);
+            assertEquals(2, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 0);
+
+            area.clear(left);
+            assertEquals(0, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 0);
+
+            area.redstoneBlock(POS.south());
+            assertEquals(0, area.get(POS).getValue(Conjunctor.POWER_TYPE), "back is not an input");
+        }
+    }
+
+    @Test
+    void conjunctorPlacedBetweenPoweredSidesUsesTheItem() {
+        try (TestArea area = TestArea.create()) {
+            area.redstoneBlock(POS.east());
+            area.redstoneBlock(POS.west());
+            assertEquals(3, placeGate(area, ModBlocks.CONJUNCTOR.get(), POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 15);
+        }
+    }
+
+    @Test
+    void conjunctorPlacedNextToOnePoweredSideShowsIt() {
+        try (TestArea area = TestArea.create()) {
+            area.redstoneBlock(POS.east());
+            assertEquals(1, placeGate(area, ModBlocks.CONJUNCTOR.get(), POS).getValue(Conjunctor.POWER_TYPE));
+            assertOutputOnlyNorth(area, POS, 0);
+        }
+    }
+
+    @Test
+    void conjunctorDoesNotKeepRescheduling() {
+        try (TestArea area = TestArea.create()) {
+            area.set(POS, ModBlocks.CONJUNCTOR.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH));
+            area.redstoneBlock(POS.east());
+            area.tick(3);
+            assertEquals(1, area.get(POS).getValue(Conjunctor.POWER_TYPE));
+            boolean scheduled = area.call(level -> level.getBlockTicks().hasScheduledTick(area.abs(POS), ModBlocks.CONJUNCTOR.get()));
+            assertFalse(scheduled, "tick still scheduled");
         }
     }
 
