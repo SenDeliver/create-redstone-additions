@@ -1,5 +1,6 @@
 package dev.siliconcarbidecube.create_redstone_additions;
 
+import com.simibubi.create.AllTags;
 import dev.siliconcarbidecube.create_redstone_additions.test.TestArea;
 import dev.siliconcarbidecube.create_redstone_additions.test.TestServer;
 import net.minecraft.core.BlockPos;
@@ -36,6 +37,9 @@ class SmokeTest {
             assertTrue(BuiltInRegistries.ITEM.containsKey(ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, id)), "item " + id);
         }
         assertNotNull(TestServer.level());
+        assertTrue(TestServer.call(() -> TestServer.get().getRecipeManager()
+                .byKey(ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, "crafting/diode")).isPresent()), "mod datapack loaded");
+        assertTrue(Blocks.REPEATER.defaultBlockState().is(AllTags.AllBlockTags.WRENCH_PICKUP.tag), "Create tags bound");
     }
 
     @Test
