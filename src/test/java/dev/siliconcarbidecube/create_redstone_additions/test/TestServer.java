@@ -35,6 +35,7 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -206,7 +207,7 @@ public final class TestServer {
             try {
                 storageSource.deleteLevel();
                 storageSource.close();
-                Files.deleteIfExists(tempDir);
+                FileUtils.deleteDirectory(tempDir.toFile());
             } catch (IOException ignored) {
             }
         }
