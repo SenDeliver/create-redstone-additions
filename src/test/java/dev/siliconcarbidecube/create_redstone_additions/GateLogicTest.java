@@ -184,6 +184,15 @@ class GateLogicTest {
     }
 
     @Test
+    void disjunctorDefaultStateIsOff() {
+        try (TestArea area = TestArea.create()) {
+            area.set(POS, ModBlocks.DISJUNCTOR.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.SOUTH));
+            area.tick(2);
+            assertOutputOnlyNorth(area, POS, 0);
+        }
+    }
+
+    @Test
     void inverterIsNot() {
         try (TestArea area = TestArea.create()) {
             assertTrue(placeGate(area, ModBlocks.INVERTER.get(), POS).getValue(DiodeBlock.POWERED), "on with no input");
