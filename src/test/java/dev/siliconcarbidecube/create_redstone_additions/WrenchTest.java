@@ -176,12 +176,16 @@ class WrenchTest {
             area.set(newLamp, Blocks.REDSTONE_LAMP.defaultBlockState());
             area.set(pos, ModBlocks.IRON_RESISTOR.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.WEST));
             area.redstoneBlock(pos.north());
-            assertEquals(0, area.get(pos).getValue(AbstractResistor.POWER));
+            area.redstoneBlock(pos.west());
+            assertEquals(13, area.get(pos).getValue(AbstractResistor.POWER));
+            assertTrue(area.get(oldLamp).getValue(RedstoneLampBlock.LIT));
+            assertFalse(area.get(newLamp).getValue(RedstoneLampBlock.LIT));
 
             area.useItemOn(area.player(AllItems.WRENCH.asStack()), pos, Direction.UP);
             assertEquals(Direction.NORTH, area.get(pos).getValue(DiodeBlock.FACING));
             assertEquals(13, area.get(pos).getValue(AbstractResistor.POWER));
             assertTrue(area.get(newLamp).getValue(RedstoneLampBlock.LIT));
+            area.tick(5);
             assertFalse(area.get(oldLamp).getValue(RedstoneLampBlock.LIT));
         }
     }
