@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RepeaterBlock;
@@ -22,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,6 +48,34 @@ class SmokeTest {
         assertTrue(TestServer.call(() -> TestServer.get().getRecipeManager()
                 .byKey(ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, "crafting/diode")).isPresent()), "mod datapack loaded");
         assertTrue(Blocks.REPEATER.defaultBlockState().is(AllTags.AllBlockTags.WRENCH_PICKUP.tag), "Create tags bound");
+    }
+
+    @Test
+    void everyRecipeLoadsWithItsResult() {
+        Map<String, String> results = Map.ofEntries(
+                Map.entry("crafting/ceramic_resistor", "ceramic_resistor"),
+                Map.entry("crafting/conjunctor", "conjunctor"),
+                Map.entry("crafting/crossroad", "crossroad"),
+                Map.entry("crafting/cyan_quartz", "cyan_quartz"),
+                Map.entry("crafting/diode", "diode"),
+                Map.entry("crafting/disjunctor", "disjunctor"),
+                Map.entry("crafting/glass_resistor", "glass_resistor"),
+                Map.entry("crafting/golden_resistor", "golden_resistor"),
+                Map.entry("crafting/inverter", "inverter"),
+                Map.entry("crafting/iron_resistor", "iron_resistor"),
+                Map.entry("crafting/quartz_semiconductor", "quartz_semiconductor"),
+                Map.entry("crafting/quartz_semiconductor_alt", "quartz_semiconductor"),
+                Map.entry("sandpaper_polishing/cyan_quartz", "polished_cyan_quartz"));
+        results.forEach((recipe, result) -> {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, recipe);
+            ItemStack stack = TestServer.call(() -> TestServer.get().getRecipeManager().byKey(id)
+                    .map(RecipeHolder::value).map(r -> r.getResultItem(TestServer.get().registryAccess())).orElse(ItemStack.EMPTY));
+            assertEquals(ResourceLocation.fromNamespaceAndPath(CreateRedstoneAdditions.MOD_ID, result),
+                    BuiltInRegistries.ITEM.getKey(stack.getItem()), "result of " + recipe);
+        });
+        long count = TestServer.call(() -> TestServer.get().getRecipeManager().getRecipes().stream()
+                .filter(r -> r.id().getNamespace().equals(CreateRedstoneAdditions.MOD_ID)).count());
+        assertEquals(results.size(), count, "mod recipe count");
     }
 
     @Test
