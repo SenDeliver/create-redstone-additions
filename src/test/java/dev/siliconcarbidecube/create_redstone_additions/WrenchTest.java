@@ -51,6 +51,22 @@ class WrenchTest {
     }
 
     @Test
+    void wrenchRotatesEveryBlock() {
+        try (TestArea area = TestArea.create()) {
+            FakePlayer player = area.player(AllItems.WRENCH.asStack());
+            BlockPos pos = new BlockPos(3, 1, 3);
+            area.redstoneBlock(pos.north());
+            for (Supplier<? extends Block> block : DropsTest.BLOCKS) {
+                area.set(pos, block.get().defaultBlockState().setValue(DiodeBlock.FACING, Direction.NORTH));
+                area.useItemOn(player, pos, Direction.UP);
+                assertEquals(Direction.EAST, area.get(pos).getValue(DiodeBlock.FACING), block.get() + " rotated");
+                area.tick(1);
+                assertTrue(area.get(pos).is(block.get()));
+            }
+        }
+    }
+
+    @Test
     void wrenchRotatesDiodeAndUpdatesRedstone() {
         try (TestArea area = TestArea.create()) {
             BlockPos pos = new BlockPos(5, 1, 5);
