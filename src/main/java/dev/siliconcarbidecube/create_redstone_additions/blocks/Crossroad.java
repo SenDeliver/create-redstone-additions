@@ -33,7 +33,10 @@ public class Crossroad extends AbstractCustomDiodeBlock {
 
     public @NotNull BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockState state = super.getStateForPlacement(ctx);
-        return state.setValue(POWER, this.getInputSignal(ctx.getLevel(), ctx.getClickedPos(), state));
+        int power = this.getInputSignal(ctx.getLevel(), ctx.getClickedPos(), state);
+        int flankPower = this.getFlankInputSignal(ctx.getLevel(), ctx.getClickedPos(), state);
+        int modelType = power > 0 && flankPower > 0 ? 3 : power > 0 ? 2 : flankPower > 0 ? 1 : 0;
+        return state.setValue(POWER, power).setValue(FLANK_POWER, flankPower).setValue(MODEL_TYPE, modelType);
     }
 
     public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction) {
