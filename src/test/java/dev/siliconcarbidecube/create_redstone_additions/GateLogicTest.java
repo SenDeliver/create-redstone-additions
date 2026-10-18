@@ -301,6 +301,16 @@ class GateLogicTest {
     }
 
     @Test
+    void crossroadGlowsForEitherAxis() {
+        BlockState crossroad = ModBlocks.CROSSROAD.get().defaultBlockState();
+        assertEquals(0, crossroad.getLightEmission());
+        assertEquals(15, crossroad.setValue(Crossroad.POWER, 15).getLightEmission());
+        assertEquals(14, crossroad.setValue(Crossroad.FLANK_POWER, 14).getLightEmission());
+        assertEquals(15, crossroad.setValue(Crossroad.POWER, 15).setValue(Crossroad.FLANK_POWER, 14).getLightEmission());
+        assertEquals(5, ModBlocks.INVERTER.get().defaultBlockState().setValue(DiodeBlock.POWERED, true).getLightEmission());
+    }
+
+    @Test
     void resistorsSubtractTheirAttenuation() {
         Map<Block, Integer> attenuation = Map.of(ModBlocks.GOLDEN_RESISTOR.get(), 1, ModBlocks.IRON_RESISTOR.get(), 2,
                 ModBlocks.CERAMIC_RESISTOR.get(), 5, ModBlocks.GLASS_RESISTOR.get(), 10);
